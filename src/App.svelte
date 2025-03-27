@@ -1,5 +1,9 @@
 <script>
-  import Renderer from "./lib/components/Renderer.svelte"
-</script>
+  import * as PIXI from "pixi.js";
 
-<Renderer></Renderer>
+  (async function () {
+    const app = new PIXI.Application();
+    await app.init({background: "#000000", resizeTo: window});
+    document.body.appendChild(app.canvas);
+  })();
+</script>
