@@ -1,9 +1,8 @@
 import { StringUtils } from "./helpers/string-utils";
 import Observer from "./observer";
+import { Settings } from "./settings";
 
-const COLOR_DIGITS = 6;
-const MAX_DIGITS_PER_REQUEST = 900;
-const CHUNK_SIZE = MAX_DIGITS_PER_REQUEST / COLOR_DIGITS;
+
 const FETCH_URL = "https://api.pi.delivery/";
 const API_VERSION = "v1";
 const QUERY_TEMPLATE = "pi?start={1}&numberOfDigits={2}&radix=16";
@@ -27,7 +26,7 @@ class PiDigitsFetcher {
         private start: number,
         private length: number,
     ) {
-        fetch(buildRequestUrl(start, CHUNK_SIZE), {
+        fetch(buildRequestUrl(start, Settings.piAssembling.CHUNK_SIZE), {
             method: "GET",
         }).then(response => {
             if (!response.ok) {
@@ -48,7 +47,7 @@ class PiDigitsFetcher {
 export class PiDigitsManager {
 
     assemble(start: number): PiDigitsFetcher {
-        return new PiDigitsFetcher(start, MAX_DIGITS_PER_REQUEST);
+        return new PiDigitsFetcher(start, Settings.piAssembling.MAX_DIGITS_PER_REQUEST);
     }
 
 
