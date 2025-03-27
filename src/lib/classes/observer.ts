@@ -1,4 +1,4 @@
-type ObserverCallback<T extends any> = (data: T) => void;
+type ObserverCallback<T extends any> = (data?: T) => void;
 
 class Observer<T extends any> {
   private callbacks: ObserverCallback<T>[] = [];
@@ -12,7 +12,7 @@ class Observer<T extends any> {
     this.callbacks = this.callbacks.filter((cb) => cb !== callback);
   }
 
-  notify(data: T): void {
+  notify(data?: T): void {
     for (const callback of this.callbacks) {
       callback(data);
     }
