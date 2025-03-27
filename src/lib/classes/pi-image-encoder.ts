@@ -1,9 +1,8 @@
-import { Color } from "pixi.js";
 import type { PiEncoder } from "./pi-codec";
 import { Settings } from "./settings";
 
 
-class PiImageEncoder implements PiEncoder<string, ImageData> {
+export class PiImageEncoder implements PiEncoder<string, ImageData> {
 
     encode(value: string): ImageData {
         const chunkDimensions = Settings.piAssembling.CHUNK_SIZE / 2;
