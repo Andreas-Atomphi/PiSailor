@@ -1,25 +1,25 @@
 type ObserverCallback<T extends any> = (data?: T) => void;
 
 class Observer<T extends any> {
-  private callbacks: ObserverCallback<T>[] = [];
+  private subscriptions: {callback: ObserverCallback<T>, oneShot: boolean}[] = [];
 
-  subscribe(callback: ObserverCallback<T>): () => void {
-    this.callbacks.push(callback);
+  subscribe(callback: ObserverCallback<T>, oneShot: boolean = false): () => void {
+    this.subscriptions.push({callback, oneShot});
     return () => this.unsubscribe(callback);
   }
 
   unsubscribe(callback: ObserverCallback<T>): void {
-    this.callbacks = this.callbacks.filter((cb) => cb !== callback);
+    this.subscriptions = this.subscriptions.filter((cb) => cb.callback !== callback);
   }
 
   notify(data?: T): void {
-    for (const callback of this.callbacks) {
-      callback(data);
+    for (const subscription of this.subscriptions) {
+      subscription.callback(data);
     }
   }
 
   clear(): void {
-    this.callbacks = [];
+    this.subscriptions = [];
   }
 }
 
