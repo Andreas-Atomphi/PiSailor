@@ -6,7 +6,7 @@
     })
 </script>
 
-<canvas></canvas>
+<canvas id="canvas-renderer"></canvas>
 
 <style>
     canvas {

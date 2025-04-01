@@ -5,7 +5,7 @@ import { Settings } from "./settings";
 export class PiImageEncoder implements PiEncoder<string, ImageData> {
 
     encode(value: string): ImageData {
-        const chunkDimensions = Settings.piAssembling.CHUNK_SIZE / 2;
+        const chunkDimensions = Math.sqrt(Settings.piAssembling.CHUNK_SIZE);
         const imageData = new ImageData(chunkDimensions, chunkDimensions);
         const data = imageData.data;
         for (let i = 0; i < data.length / 4; i ++) {
