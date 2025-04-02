@@ -30,36 +30,33 @@ function setupPIFetch(start: number, pRemaining: number): string[] {
     return requestURLs;
 }
 
-export class PiDigitsFetcher {
+export class PiDigitsManager {
 
     public readonly assembleEnded = new Observer();
     public readonly assembleRaisedError = new Observer();
-    private _assembling: boolean = false
+    public readonly refreshed = new Observer();
+
     private _digits: string = "";
+    private _isAssembling: boolean = false;
+    private _maxSize: number = 100_000_000;
 
-    constructor(
-        private readonly start: number,
-        private size: number,
-    ) {
-        
-    }
+    get length() { return this._digits.length; }
 
-    async assemble(): Promise<Error | null> {
+    async startAssemble(): Promise<Error | null> {
         type PiResponse = {content: string};
-        let tempDigits = "";
-        const remainingLength = () => this.size - tempDigits.length;
-        this._assembling = true
+        const remainingLength = () => this._maxSize - this._digits.length;
+        this._isAssembling = true
         try {
-            let tempStartOffset = 0;
+            let offset = 0;
             while (remainingLength() > 0n) {
-                const requestURLs = setupPIFetch(this.start + tempStartOffset, remainingLength());
+                const requestURLs = setupPIFetch(offset , remainingLength());
                 const responses = await Promise.allSettled(
                     requestURLs.map(async (url): Promise<string> => {
                         try {
                             const response = await fetch(url);
                             if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
                             const data: PiResponse = await response.json();
-                            tempStartOffset += data.content.length;
+                            offset += data.content.length;
                             return data.content;
                         } catch (error) {
                             console.error("PI request failed:", error);
@@ -67,37 +64,33 @@ export class PiDigitsFetcher {
                         }
                     })
                 );
-
-                tempDigits += responses
+                
+                this._digits += responses
                     .filter(res => res.status === "fulfilled")
                     .map(res => res.value)
                     .join("");
-                
+                this.refreshed.notify();
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         } catch (error) {
-            this._assembling = false
+            this._isAssembling = false
             console.error("Uncaught error on assemble:", error);
             this.assembleRaisedError.notify();
             return error as Error;
         } finally {
-            this._digits = tempDigits;
-            this._assembling = false
+            this._isAssembling = false
             this.assembleEnded.notify();
         }
-        this._assembling = false;
+        this._isAssembling = false;
         return null
     }
-
-    get digits() { return this._digits; }
-    get assembling () { return this._assembling; }
-}
-
-export class PiDigitsManager {
-
-    assemble(start: number): PiDigitsFetcher {
-        return new PiDigitsFetcher(start, Settings.piAssembling.MAX_DIGITS_PER_REQUEST);
+    getDigits(start: number, digits:number): string {
+        if (this._digits.length < start || this._digits.length < start + digits) {
+            throw new Error("Invalid range");
+        }
+        return this._digits.substring(start, start + digits);
     }
 
+    get isAssembling () { return this._isAssembling; }
 
 }

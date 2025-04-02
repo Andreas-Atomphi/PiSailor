@@ -1,13 +1,14 @@
 import { Container, Point, Sprite, Texture } from "pixi.js";
 import app from "../../main";
-import { PiDigitsManager, type PiDigitsFetcher } from "./pi-digits-manager";
+import { PiDigitsManager } from "./pi-digits-manager";
 import { Settings } from "./settings";
 
 export class ChunkManager extends Container {
 
     private _chunks: Map<string, Sprite> = new Map();
-    private _queue: Point[] = [new Point(0, 0)]
+    private _queue: Point[] = [new Point(0, 0)];
     public maxChunks = 1000;
+    get chunksLength() { return this._queue.length; }
 
     constructor() {
         super();

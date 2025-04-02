@@ -13,22 +13,33 @@
             const piImageEncoder = new PiImageEncoder();
             const piDecoder = new PiDecoder(piImageEncoder);
             const chunkManager = new ChunkManager();
-            let assembleStart = 0;
-            const loopPiFetch = () => {
-                  const piFetcher = piDigitsManager.assemble(assembleStart);
-                  piFetcher.assembleEnded.subscribe((_) => {
-                        const image = piDecoder.decode(piFetcher.digits);
-                        const chunk = chunkManager.generateChunk(image);
-                        assembleStart += Settings.piAssembling.CHUNK_SIZE;
-                        if (chunk) app.stage.addChild(chunk);
-                        loopPiFetch();
-                  }, true);
-                  piFetcher.assemble();
-            };
-            loopPiFetch();
+            piDigitsManager.startAssemble();
+            piDigitsManager.refreshed.subscribe((_) => {
+                  if (
+                        piDigitsManager.length == 0 ||
+                        piDigitsManager.length %
+                              (Settings.piAssembling.CHUNK_SIZE * 6) !=
+                              0
+                  )
+                        return;
+                  let assembleStart =
+                        piDigitsManager.length -
+                        Settings.piAssembling.CHUNK_SIZE * 6;
+                  const image = piDecoder.decode(
+                        piDigitsManager.getDigits(
+                              assembleStart,
+                              Settings.piAssembling.CHUNK_SIZE * 6,
+                        ),
+                  );
+                  const chunk = chunkManager.generateChunk(image);
+                  if (chunk) app.stage.addChild(chunk);
+            });
 
             app.ticker.add((time) => {
-                  if (displayPointerData == null || displayPointerData.pressed == false) {
+                  if (
+                        displayPointerData == null ||
+                        displayPointerData.pressed == false
+                  ) {
                         app.stage.x -=
                               inputAxis("KeyA", "KeyD") * 10 * time.deltaTime;
                         app.stage.y -=
