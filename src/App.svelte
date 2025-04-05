@@ -1,5 +1,7 @@
 <script lang="ts">
-      import { ObservablePoint, Point } from "pixi.js";
+      import { Container, Point } from "pixi.js";
+      import "pixi.js/math-extras";
+      import { Viewport } from "pixi-viewport";
       import { setup } from "./app-sailor-setup";
       import { ChunkManager } from "./lib/classes/chunk-manager";
       import { PiDecoder } from "./lib/classes/pi-codec";
@@ -7,103 +9,75 @@
       import { PiImageEncoder } from "./lib/classes/pi-image-encoder";
       import { Settings } from "./lib/classes/settings";
 
-      setup().then(({ app, inputAxis, addInputListener, isKeyJustPressed }) => {
-            document.body.appendChild(app.canvas);
-            const piDigitsManager = new PiDigitsManager();
-            const piImageEncoder = new PiImageEncoder();
-            const piDecoder = new PiDecoder(piImageEncoder);
-            const chunkManager = new ChunkManager();
-            piDigitsManager.startAssemble();
-            piDigitsManager.refreshed.subscribe((_) => {
-                  if (
-                        piDigitsManager.length == 0 ||
-                        piDigitsManager.length %
-                              (Settings.piAssembling.CHUNK_SIZE * 6) !=
-                              0
-                  )
-                        return;
-                  let assembleStart =
-                        piDigitsManager.length -
-                        Settings.piAssembling.CHUNK_SIZE * 6;
-                  const image = piDecoder.decode(
-                        piDigitsManager.getDigits(
-                              assembleStart,
-                              Settings.piAssembling.CHUNK_SIZE * 6,
-                        ),
-                  );
-                  const chunk = chunkManager.generateChunk(image);
-                  if (chunk) app.stage.addChild(chunk);
-            });
+      setup().then(
+            ({
+                  app,
+                  inputAxis,
+                  inputSign,
+                  addInputListener,
+                  isKeyJustPressed,
+            }) => {
+                  document.body.appendChild(app.canvas);
+                  const viewport = new Viewport({
+                        screenWidth: window.innerWidth,
+                        screenHeight: window.innerHeight,
+                        worldWidth: 1000,
+                        worldHeight: 1000,
+                        events: app.renderer.events,
+                  });
+                  viewport.clampZoom({
+                        minScale: 3,
+                        maxScale: 10,
+                  })
+                  app.stage.addChild(viewport);
+                  viewport.drag().pinch().wheel({ smooth: 3 }).decelerate();
 
-            app.ticker.add((time) => {
-                  if (
-                        displayPointerData == null ||
-                        displayPointerData.pressed == false
-                  ) {
-                        app.stage.x -=
-                              inputAxis("KeyA", "KeyD") * 10 * time.deltaTime;
-                        app.stage.y -=
-                              inputAxis("KeyW", "KeyS") * 10 * time.deltaTime;
-                        app.stage.scale.x +=
-                              inputAxis("KeyQ", "KeyE") * time.deltaTime;
-                        app.stage.scale.y = app.stage.scale.x;
-                        app.stage.scale.x = Math.max(2, app.stage.scale.x);
-                        app.stage.scale.y = app.stage.scale.x;
-                  } else {
-                        if (displayPointerData.pressed) {
-                              app.stage.x =
-                                    appStagePressPosition!.x +
-                                    displayPointerData.delta.x -
-                                    displayPointerData.pressedPosition.x;
-                              app.stage.y =
-                                    appStagePressPosition!.y +
-                                    displayPointerData.delta.y -
-                                    displayPointerData.pressedPosition.y;
-                        }
-                  }
-            });
+                  const piDigitsManager = new PiDigitsManager();
+                  const piImageEncoder = new PiImageEncoder();
+                  const piDecoder = new PiDecoder(piImageEncoder);
+                  const chunkManager = new ChunkManager();
+                  
+                  viewport.addChild(chunkManager);
+                  
+                  piDigitsManager.startAssemble();
+                  piDigitsManager.refreshed.subscribe((_) => {
+                        if (
+                              piDigitsManager.length == 0 ||
+                              piDigitsManager.length %
+                                    (Settings.piAssembling.CHUNK_SIZE * 6) !=
+                                    0
+                        )
+                              return;
+                        let assembleStart =
+                              piDigitsManager.length -
+                              Settings.piAssembling.CHUNK_SIZE * 6;
+                        const image = piDecoder.decode(
+                              piDigitsManager.getDigits(
+                                    assembleStart,
+                                    Settings.piAssembling.CHUNK_SIZE * 6,
+                              ),
+                        );
+                        const chunk = chunkManager.generateChunk(image);
+                        if (chunk) chunkManager.addChild(chunk);
+                  });
 
-            addInputListener((event) => {
-                  if (isKeyJustPressed("KeyR"))
-                        app.stage.scale = { x: 1, y: 1 };
-            });
+                  app.ticker.add((time) => {
+                        viewport.position.subtract(
+                              inputAxis("KeyA", "KeyD", "KeyW", "KeyS")
+                                    .multiplyScalar(10)
+                                    .multiplyScalar(time.deltaTime),
+                              viewport.position,
+                        );
+                        viewport.zoom(
+                              -inputSign("KeyQ", "KeyE") * time.deltaTime * 20,
+                              true
+                        );
+                  });
 
-            type CanvasPointerData = {
-                  pressed: boolean;
-                  pressedPosition: Point;
-                  releasedPosition: Point | null;
-                  delta: Point;
-            };
-
-            let displayPointerData: CanvasPointerData | null;
-            let appStagePressPosition: Point | null = null;
-            window.addEventListener("pointerdown", (event) => {
-                  displayPointerData = {
-                        pressed: true,
-                        pressedPosition: new Point(
-                              event.clientX,
-                              event.clientY,
-                        ),
-                        releasedPosition: null,
-                        delta: new Point(event.clientX, event.clientY),
-                  };
-                  appStagePressPosition = app.stage.position.clone();
-            });
-            window.addEventListener("pointerup", (event) => {
-                  if (displayPointerData == null) return;
-                  displayPointerData!.releasedPosition = new Point(
-                        event.clientX,
-                        event.clientY,
-                  );
-                  displayPointerData.pressed = false;
-                  appStagePressPosition = null;
-            });
-            window.addEventListener("pointermove", (event) => {
-                  if (displayPointerData == null) return;
-                  displayPointerData!.delta = new Point(
-                        event.clientX,
-                        event.clientY,
-                  );
-            });
-      });
+                  addInputListener((event) => {
+                        if (isKeyJustPressed("KeyR"))
+                              app.stage.scale = new Point(0, 0);
+                  });
+            },
+      );
 </script>

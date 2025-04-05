@@ -1,4 +1,5 @@
-import * as PIXI from "pixi.js";
+import { Application, Point } from "pixi.js";
+import "pixi.js/math-extras";
 import { PiDigitsManager } from "./lib/classes/pi-digits-manager";
 import { PiImageEncoder } from "./lib/classes/pi-image-encoder";
 import { PiDecoder } from "./lib/classes/pi-codec";
@@ -7,7 +8,7 @@ import { Settings } from "./lib/classes/settings";
 
 
 export async function setup() {
-    const app = new PIXI.Application();
+    const app = new Application();
     await app.init({
         background: "#000000",
         resizeTo: window,
@@ -16,19 +17,19 @@ export async function setup() {
         resolution: 1,
     });
 
-
-    app.stage.scale = 1;
-    app.stage.x = -app.stage.width / 2;
-    app.stage.y = -app.stage.height / 2;
-
-
-
     const keysMap = new Map<string, { justPressed: boolean }>();
 
-    const isKeyPressed = (key: string) => keysMap.has(key);
-    const isKeyJustPressed = (key: string) => keysMap.get(key)?.justPressed ?? false;
-    const inputAxis = (minus: string, plus: string) =>
+    const isKeyPressed = (key: string) => keysMap.has(key) ?? false;
+    const isKeyJustPressed = (key: string) => (keysMap.get(key)?.justPressed) ?? false;
+    
+    const inputSign = (minus: string, plus: string):number =>
         -Number(isKeyPressed(minus)) + Number(isKeyPressed(plus));
+
+    const inputAxis = (left: string, right: string, up: string, down: string): Point => {
+        const [xSign, ySign] = [inputSign(left, right), inputSign(up, down)]
+        if (xSign === 0 && ySign === 0) return new Point(0, 0);
+        return new Point(xSign, ySign).normalize();
+    }
 
     const inputListeners: Set<(event: KeyboardEvent) => void> = new Set();
 
@@ -69,6 +70,7 @@ export async function setup() {
         isKeyJustPressed,
         addInputListener,
         removeInputListener,
+        inputSign,
         inputAxis
     }
 }
