@@ -14,29 +14,33 @@ function refreshGrid(chunkGrid: Graphics, screen: Size, fillGradient: FillGradie
     );
     const chunkArea = Math.sqrt(Settings.piAssembling.CHUNK_SIZE);
     const halfArea = chunkArea * 0.5;
-    const gridStrokes:{ from: Point, to: Point }[] = [
-        {
-            from: worldCenter.subtract({ x: halfArea, y: halfArea + chunkArea}),
-            to: worldCenter.add({ x: -halfArea, y: halfArea + chunkArea}),
-        },
-        {
-            from: worldCenter.subtract({ x: -halfArea, y: halfArea + chunkArea}),
-            to: worldCenter.add({ x: halfArea, y: halfArea + chunkArea}),
-        },
-        {
-            from: worldCenter.subtract({ x: halfArea + chunkArea, y: halfArea}),
-            to: worldCenter.add({ x: halfArea + chunkArea, y: -halfArea}),
-        },
-        {
-            from: worldCenter.subtract({ x: halfArea + chunkArea, y: -halfArea}),
-            to: worldCenter.add({ x: halfArea + chunkArea, y: halfArea}),
-        },
+    const gridRectangles:{x: number, y: number, alpha: number}[] = [
+        {x: 0, y: 0, alpha: 1.0},
+        {x: -1, y: 0, alpha: 1.0},
+        {x: 1, y: 0, alpha: 1.0},
+        {x: 0, y: 1, alpha: 1.0},
+        {x: 0, y: -1, alpha: 1.0},
+        {x: -1, y: -1, alpha: 0.75},
+        {x: 1, y: -1, alpha: 0.75},
+        {x: -1, y: 1, alpha: 0.75},
+        {x: 1, y: 1, alpha: 0.75},
+        {x: 0, y: -2, alpha: 0.5},
+        {x: 2, y: 0, alpha: 0.5},
+        {x: -2, y: 0, alpha: 0.5},
+        {x: 0, y: 2, alpha: 0.5},
     ];
-    for (const stroke of gridStrokes) {
+    for (const rect of gridRectangles) {
         chunkGrid
-            .moveTo(stroke.from.x, stroke.from.y)
-            .lineTo(stroke.to.x, stroke.to.y)
-            .stroke({ fill: fillGradient, alpha: 1.0, width: 2 });
+            .rect(
+                (worldCenter.x - halfArea) + rect.x * chunkArea + 1,
+                (worldCenter.y - halfArea) + rect.y * chunkArea + 1,
+                chunkArea - 1,
+                chunkArea - 1
+            )
+            .fill({
+                fill: fillGradient,
+                alpha: rect.alpha
+            });
     }
 }
 
