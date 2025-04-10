@@ -1,4 +1,4 @@
-import { Application, Point } from "pixi.js";
+import { Application, Point, type ICanvas } from "pixi.js";
 import "pixi.js/math-extras";
 import { PiDigitsManager } from "./lib/classes/pi-digits-manager";
 import { PiImageEncoder } from "./lib/classes/pi-image-encoder";
@@ -7,7 +7,7 @@ import { ChunkManager } from "./lib/classes/chunk-manager";
 import { Settings } from "./lib/classes/settings";
 
 
-export async function setup() {
+export async function setup(canvas:ICanvas) {
     const app = new Application();
     await app.init({
         background: "#000000",
@@ -15,6 +15,7 @@ export async function setup() {
         antialias: false,
         roundPixels: true,
         resolution: 1,
+        view: canvas
     });
 
     const keysMap = new Map<string, { justPressed: boolean }>();
@@ -66,11 +67,13 @@ export async function setup() {
 
     return {
         app,
-        isKeyPressed,
-        isKeyJustPressed,
-        addInputListener,
-        removeInputListener,
-        inputSign,
-        inputAxis
+        Input: {
+            isKeyPressed,
+            isKeyJustPressed,
+            addInputListener,
+            removeInputListener,
+            inputSign,
+            inputAxis
+        }
     }
 }

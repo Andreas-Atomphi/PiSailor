@@ -1,12 +1,30 @@
 <script lang="ts">
-    window.addEventListener("resize", event => {
-        const renderer = document.querySelector("canvas");
-        renderer!.width = window.innerWidth;
-        renderer!.height = window.innerHeight;
-    })
+    import { onMount, onDestroy } from "svelte";
+
+    let canvas: HTMLCanvasElement;
+
+    // Resize handler
+    const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+
+    onMount(() => {
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener("resize", resizeCanvas);
+    });
+
+    // Método exportado pra pegar o canvas de fora
+    export function getCanvas(): HTMLCanvasElement {
+        return canvas;
+    }
 </script>
 
-<canvas id="canvas-renderer"></canvas>
+<canvas bind:this={canvas}></canvas>
 
 <style>
     canvas {
