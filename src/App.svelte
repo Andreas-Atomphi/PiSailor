@@ -3,6 +3,7 @@
       import { onMount } from "svelte";
       import { Graphics, Point } from "pixi.js";
       import { Viewport } from "pixi-viewport";
+      import hotkeys from "hotkeys-js";
       import { setup } from "./app-sailor-setup";
       import Renderer from "./lib/components/Renderer.svelte";
       import {
@@ -13,8 +14,13 @@
       import { PiDigitsManager } from "./lib/classes/pi-digits-manager";
       import { PiImageEncoder } from "./lib/classes/pi-image-encoder";
       import { Settings } from "./lib/classes/settings";
+      import TriggerButton from "./lib/components/TriggerButton.svelte";
+      import Menu from "./lib/components/menu/Menu.svelte";
 
       let renderer: Renderer;
+      let menu: Menu;
+
+      hotkeys.setScope("general");
       onMount(async () => {
             const { app, Input } = await setup(renderer!.getCanvas());
             const viewport = new Viewport({
@@ -105,3 +111,60 @@
 </script>
 
 <Renderer bind:this={renderer}></Renderer>
+
+<TriggerButton
+      hotkey="m"
+      onTrigger={() => {
+                  menu.classList?.remove("w-0");
+                  menu.classList?.add("w-100");
+                  hotkeys.setScope("inMenu");
+      }}
+      icon="menu"
+      className="absolute top-0 right-0 mt-4 mr-4"
+/>
+
+<Menu
+      bind:this={menu}
+      classNames="
+            absolute
+            top-0
+            m-0
+            p-0
+            right-0
+            w-0
+            h-full
+            bg-black
+            border-l-solid
+            border-l-white
+            border-l-2
+            overflow-x-clip
+            overflow-y-visible
+      "
+>
+      <div class="grid grid-flow-row grid-rows-[3rem] p-2 m-0">
+            <div dir="rtl">
+                  <TriggerButton
+                        hotkey="esc"
+                        scope="inMenu"
+                        onTrigger={() => {
+                              menu.classList?.remove("w-100");
+                              menu.classList?.add("w-0");
+                              hotkeys.setScope("general");
+                        }}
+                        icon="close"
+                  />
+            </div>
+            <div class="invisible" tabindex="-1">spacer</div>
+            <button class="menu-button">text</button>
+      </div>
+</Menu>
+
+
+<style>
+      :global(body){
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            overflow: hidden;
+      }
+</style>

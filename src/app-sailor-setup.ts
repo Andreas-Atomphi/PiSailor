@@ -15,7 +15,7 @@ export async function setup(canvas:ICanvas) {
         antialias: false,
         roundPixels: true,
         resolution: 1,
-        view: canvas
+        canvas
     });
 
     const keysMap = new Map<string, { justPressed: boolean }>();

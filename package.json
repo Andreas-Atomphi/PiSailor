@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.16",
+    "hotkeys-js": "^3.13.9",
     "pixi-viewport": "^6.0.3",
     "pixi.js": "^8.9.1",
     "tailwindcss": "^4.0.16"
