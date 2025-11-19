@@ -16,11 +16,13 @@
       import { Settings } from "./lib/classes/settings";
       import TriggerButton from "./lib/components/TriggerButton.svelte";
       import Menu from "./lib/components/menu/Menu.svelte";
+      import KeyIndicator from "./lib/components/KeyIndicator.svelte";
 
       let renderer: Renderer;
       let menu: Menu;
 
       hotkeys.setScope("general");
+
       onMount(async () => {
             const { app, Input } = await setup(renderer!.getCanvas());
             const viewport = new Viewport({
@@ -114,51 +116,69 @@
 
 <TriggerButton
       hotkey="m"
-      onTrigger={() => {
-                  menu.classList?.remove("w-0");
-                  menu.classList?.add("w-100");
-                  hotkeys.setScope("inMenu");
-      }}
+      onTrigger={ () => {} }
       icon="menu"
       className="absolute top-0 right-0 mt-4 mr-4"
 />
 
-<Menu
-      bind:this={menu}
-      classNames="
-            absolute
-            top-0
-            m-0
-            p-0
-            right-0
-            w-0
-            h-full
-            bg-black
-            border-l-solid
-            border-l-white
-            border-l-2
-            overflow-x-clip
-            overflow-y-visible
-      "
->
-      <div class="grid grid-flow-row grid-rows-[3rem] p-2 m-0">
-            <div dir="rtl">
-                  <TriggerButton
-                        hotkey="esc"
-                        scope="inMenu"
-                        onTrigger={() => {
-                              menu.classList?.remove("w-100");
-                              menu.classList?.add("w-0");
-                              hotkeys.setScope("general");
-                        }}
-                        icon="close"
-                  />
-            </div>
-            <div class="invisible" tabindex="-1">spacer</div>
-            <button class="menu-button">text</button>
-      </div>
-</Menu>
 
+<div class="
+      absolute
+      bottom-0
+      left-0
+      grid
+      grid-rows-2
+      grid-cols-3
+      justify-between
+      gap-4
+      bg-black
+      pt-4
+      pr-4
+      pb-10
+      pl-10
+      rounded-tr-xl
+      border-t-4
+      border-r-4
+      border-white
+      ">
+            
+            <KeyIndicator
+                  key="q"
+                  icon="zoom_out"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
+                  key="w"
+                  icon="keyboard_arrow_up"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
+                  key="e"
+                  icon="zoom_in"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
+                  key="a"
+                  icon="keyboard_arrow_left"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
+                  key="s"
+                  icon="keyboard_arrow_down"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
+                  key="d"
+                  icon="keyboard_arrow_right"
+                  className="relative"
+                  shape="square"
+            />
+</div>
 
 <style>
       :global(body){

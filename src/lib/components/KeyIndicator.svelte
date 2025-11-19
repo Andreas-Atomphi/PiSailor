@@ -3,51 +3,44 @@
     import { onDestroy, onMount } from "svelte";
     import "tailwindcss";
 
-    let button: HTMLButtonElement | null;
+    let mainDiv: HTMLDivElement | null;
+    const scope = "general";
 
     const {
-        onTrigger = () => {},
-        hotkey,
-        scope = "general",
+        onTrigger=()=>{},
+        key,
         icon,
         className,
-        shape = "circle"
+        shape = "square"
     }: {
         onTrigger?: () => void;
-        hotkey?: string;
-        scope?: string;
+        key?: string;
         icon?: string;
         className?: string;
         shape?: "square" | "round" | "circle";
     } = $props();
 
     onMount(() => {
-        if (hotkey != undefined)
-            hotkeys(hotkey, scope, function() {
-                button?.classList.add("pulse")
-                onTrigger();
-                setTimeout(() => {
-                    if (scope != hotkeys.getScope())
-                    button?.classList.remove("pulse")
-                }, 100)
-                window.addEventListener("keyup", e => {
-                    if (hotkey == e.key)
-                        button?.classList.remove("pulse")
-                })
-            });
+        
+        window.addEventListener("keydown", e => {
+            if (hotkeys.getScope() != scope) return;
+            if (key == e.key)
+                mainDiv?.classList.add("pulse")
+        })
+
+        window.addEventListener("keyup", e => {
+            if (key == e.key)
+            mainDiv?.classList.remove("pulse")
+        })
     });
 
-    onDestroy(() => {
-        if (hotkey != undefined) hotkeys.unbind(hotkey, scope);
-    });
+    onDestroy(() => {});
 </script>
 
 <div class={className} tabindex="-1">
-    <button
-        bind:this={button}
+    <div
+        bind:this={mainDiv}
         tabindex="-1"
-        onclick={onTrigger}
-        type="button"
         class="
         relative
         block
@@ -87,9 +80,9 @@
                 max-sm:hidden
             "
         >
-            {hotkey}
+            {key}
         </span>
-    </button>
+    </div>
 </div>
 
 
