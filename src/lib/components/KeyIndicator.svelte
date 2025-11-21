@@ -4,6 +4,7 @@
     import "tailwindcss";
 
     let mainDiv: HTMLDivElement | null;
+    let keyStateIndicator: HTMLSpanElement | null;
     const scope = "general";
 
     const {
@@ -21,16 +22,16 @@
     } = $props();
 
     onMount(() => {
-        
+        if (key == undefined) return;
         window.addEventListener("keydown", e => {
             if (hotkeys.getScope() != scope) return;
             if (key == e.key)
-                mainDiv?.classList.add("pulse")
+                keyStateIndicator?.classList.add("pulse")
         })
 
         window.addEventListener("keyup", e => {
             if (key == e.key)
-            mainDiv?.classList.remove("pulse")
+            keyStateIndicator?.classList.remove("pulse")
         })
     });
 
@@ -61,6 +62,7 @@
             >{icon}</span
         >
         <span
+            bind:this={keyStateIndicator}
             class="
                 block
                 absolute

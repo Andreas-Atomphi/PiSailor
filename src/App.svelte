@@ -32,7 +32,7 @@
             });
             viewport
                   .clampZoom({
-                        minScale: 3,
+                        minScale: 0.25,
                         maxScale: 10,
                   })
                   .drag()
@@ -114,21 +114,13 @@
 
 <Renderer bind:this={renderer}></Renderer>
 
-<TriggerButton
-      hotkey="m"
-      onTrigger={ () => {} }
-      icon="menu"
-      className="absolute top-0 right-0 mt-4 mr-4"
-/>
-
-
 <div class="
       absolute
       bottom-0
       left-0
       grid
       grid-rows-2
-      grid-cols-3
+      grid-cols-4
       justify-between
       gap-4
       bg-black
@@ -161,6 +153,12 @@
                   shape="square"
             />
             <KeyIndicator
+                  key="r"
+                  icon="settings_backup_restore"
+                  className="relative"
+                  shape="square"
+            />
+            <KeyIndicator
                   key="a"
                   icon="keyboard_arrow_left"
                   className="relative"
@@ -178,6 +176,11 @@
                   className="relative"
                   shape="square"
             />
+            <KeyIndicator
+                  className="relative"
+                  shape="circle"
+            />
+
 </div>
 
 <style>
