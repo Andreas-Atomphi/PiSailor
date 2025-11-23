@@ -23,6 +23,7 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
+    "@sveltejs/adapter-auto": "^7.0.0",
     "@tailwindcss/vite": "^4.0.16",
     "hotkeys-js": "^3.13.9",
     "pixi-filters": "^6.1.4",
