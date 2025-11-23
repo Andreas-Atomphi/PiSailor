@@ -4,6 +4,7 @@
     import "tailwindcss";
 
     let button: HTMLButtonElement | null;
+    let shortcutIndicator: HTMLSpanElement | null;
 
     const {
         onTrigger = () => {},
@@ -24,15 +25,15 @@
     onMount(() => {
         if (hotkey != undefined)
             hotkeys(hotkey, scope, function() {
-                button?.classList.add("pulse")
+                shortcutIndicator?.classList.add("pulse")
                 onTrigger();
                 setTimeout(() => {
                     if (scope != hotkeys.getScope())
-                    button?.classList.remove("pulse")
+                    shortcutIndicator?.classList.remove("pulse")
                 }, 100)
                 window.addEventListener("keyup", e => {
                     if (hotkey == e.key)
-                        button?.classList.remove("pulse")
+                    shortcutIndicator?.classList.remove("pulse")
                 })
             });
     });
@@ -47,6 +48,18 @@
         bind:this={button}
         tabindex="-1"
         onclick={onTrigger}
+        onmousedown={() => {
+            button?.classList.add("pulse");
+        }}
+        onmouseout={() => {
+            button?.classList.remove("pulse");
+        }}
+        onblur={() => {
+            button?.classList.remove("pulse");
+        }}
+        onmouseup={() => {
+            button?.classList.remove("pulse");
+        }}
         type="button"
         class="
         relative
@@ -68,6 +81,7 @@
             >{icon}</span
         >
         <span
+            bind:this={shortcutIndicator}
             class="
                 block
                 absolute
